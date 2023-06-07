@@ -28,7 +28,8 @@ type Edit struct {
 			BlockValue Block `json:"block_value"`
 		} `json:"after"`
 	} `json:"block_data"`
-	NavigableBlockID string `json:"navigable_block_id"`
+	BlockSchema      map[string]interface{} `json:"block_schema"`
+	NavigableBlockID string                 `json:"navigable_block_id"`
 
 	CollectionID    string `json:"collection_id"`
 	CollectionRowID string `json:"collection_row_id"`
