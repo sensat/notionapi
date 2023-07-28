@@ -1,5 +1,10 @@
 package notionapi
 
+import (
+	"bytes"
+	"strconv"
+)
+
 // Author represents the author of an Edit
 type Author struct {
 	ID    string `json:"id"`
@@ -39,12 +44,12 @@ type Edit struct {
 type Activity struct {
 	Role string `json:"role"`
 
-	ID        string `json:"id"`
-	SpaceID   string `json:"space_id"`
-	StartTime string `json:"start_time"`
-	EndTime   string `json:"end_time"`
-	Type      string `json:"type"`
-	Version   int    `json:"version"`
+	ID        string    `json:"id"`
+	SpaceID   string    `json:"space_id"`
+	StartTime SafeInt64 `json:"start_time"`
+	EndTime   SafeInt64 `json:"end_time"`
+	Type      string    `json:"type"`
+	Version   int       `json:"version"`
 
 	ParentID    string `json:"parent_id"`
 	ParentTable string `json:"parent_table"`
@@ -62,4 +67,23 @@ type Activity struct {
 	Invalid bool `json:"invalid"`
 
 	RawJSON map[string]interface{} `json:"-"`
+}
+
+type SafeInt64 int64
+
+func (s *SafeInt64) UnmarshalJSON(data []byte) error {
+	i := (*int64)(s)
+	if !bytes.HasPrefix(data, []byte{'"'}) {
+		return jsonit.Unmarshal(data, i)
+	}
+	var str string
+	if err := jsonit.Unmarshal(data, &str); err != nil {
+		return err
+	}
+	val, err := strconv.ParseInt(str, 10, 64)
+	if err != nil {
+		return err
+	}
+	*i = val
+	return nil
 }
